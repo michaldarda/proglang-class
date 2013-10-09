@@ -1,4 +1,4 @@
-fun is_older (date1 : int * int * int, date2 : int * int * int ) =
+fun is_older(date1 : int * int * int, date2 : int * int * int ) =
     let
         fun in_days (date : int * int * int) =
             #1(date) * 365 + #2(date) * 31 + #3(date)
@@ -6,10 +6,10 @@ fun is_older (date1 : int * int * int, date2 : int * int * int ) =
         in_days(date1) < in_days(date2)
     end
 
-fun number_in_month (dates : (int * int * int) list, month : int) =
+fun number_in_month(dates : (int * int * int) list, month : int) =
     let
         fun number_in_month_iter (dates : (int * int * int) list, month : int, accu : int) =
-            if null dates then
+            if null(dates) then
                 accu
             else if #2(hd(dates)) = month then
                 number_in_month_iter(tl(dates), month, accu + 1)
@@ -19,10 +19,10 @@ fun number_in_month (dates : (int * int * int) list, month : int) =
         number_in_month_iter(dates, month, 0)
     end
 
-fun number_in_months (dates : (int * int * int) list, months : int list) =
+fun number_in_months(dates : (int * int * int) list, months : int list) =
     let
-        fun number_in_months_iter (dates : (int * int * int) list, months : int list, accu : int) =
-            if null months then
+        fun number_in_months_iter(dates : (int * int * int) list, months : int list, accu : int) =
+            if null(months) then
                 accu
             else
                 number_in_months_iter(dates, tl(months), accu + number_in_month(dates, hd(months)))
@@ -30,15 +30,15 @@ fun number_in_months (dates : (int * int * int) list, months : int list) =
         number_in_months_iter(dates, months, 0)
     end
 
-fun dates_in_month (dates : (int * int * int) list, month : int) =
+fun dates_in_month(dates : (int * int * int) list, month : int) =
     let
         fun dates_in_month_iter(dates: (int * int * int) list, month : int, accu: (int * int * int) list) =
-            if null dates then
+            if null(dates) then
                 accu
             else if #2(hd(dates)) = month then
-                dates_in_month_iter(tl(dates),month, hd(dates) :: accu)
+                dates_in_month_iter(tl(dates), month, hd(dates) :: accu)
             else
-                dates_in_month_iter(tl(dates),month, accu)
+                dates_in_month_iter(tl(dates), month, accu)
     in
         dates_in_month_iter(dates, month, [])
     end
@@ -75,11 +75,16 @@ fun date_to_string (date : int * int * int) =
             "October",
             "November",
             "December"
-        ]
+        ];
+
+        val month_name = get_nth(months, #2(date));
+        val day = Int.toString(#3(date));
+        val year = Int.toString(#1(date));
     in
-        get_nth(months, #2(date)) ^ " " ^ Int.toString(#3(date)) ^ ", " ^ Int.toString(#1(date))
+        month_name ^ " " ^ day ^ ", " ^ year
     end
 
+(* if think this needs a bit refactor *)
 fun number_before_reaching_sum (sum : int, numbers : int list) =
     let
         fun number_before_reaching_sum_iter(sum : int, numbers : int list, accu : int, current_sum : int) =
@@ -92,12 +97,38 @@ fun number_before_reaching_sum (sum : int, numbers : int list) =
     end
 
 fun what_month(day_of_year : int) =
-    number_before_reaching_sum(day_of_year, [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]) + 1
+    let
+        val months_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    in
+        number_before_reaching_sum(day_of_year, months_lengths) + 1
+    end
 
-(*fun oldest(dates : (int : int : int) list) =
-    fun_oldest_iter(dates : (int : int : int) list, current_oldest : (int * int * int)) =
-        if null dates then
-            NONE
-        else if null tl(dates) then
-            SOME hd(dates)
-        else*)
+
+fun month_range(day1 : int, day2 : int) =
+    let
+        fun count (from : int, to : int) =
+            if from = to
+            then to :: []
+            else from :: count(from + 1, to)
+
+        fun month_range(days : int list, accu : int list) =
+            if null days
+            then accu
+            else month_range(tl(days), what_month(hd(days)) :: accu)
+    in
+        rev(month_range(count(day1, day2), []))
+    end
+
+fun oldest(dates : (int * int * int) list) =
+    let
+        fun oldest_iter(dates : (int * int * int) list, current_oldest : (int * int * int)) =
+            if null(dates)
+            then current_oldest
+            else if is_older(hd(dates), current_oldest)
+            then oldest_iter(tl(dates), hd(dates))
+            else oldest_iter(tl(dates), current_oldest)
+    in
+        if null(dates)
+        then NONE
+        else SOME(oldest_iter(tl(dates), hd(dates)))
+    end
