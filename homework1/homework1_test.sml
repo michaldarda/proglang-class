@@ -33,3 +33,5 @@ val month_range_test2 = month_range(5, 3) = [];
 val oldest_test1 = oldest([(2012,2,28),(2011,3,31),(2011,4,28)]) = SOME (2011,3,31);
 val oldest_test2 = oldest([(2012,2,28)]) = SOME (2012,2,28);
 val oldest_test3 = oldest([]) = NONE;
+
+val duplicates = remove_duplicates([(3,5,3),(1,2,3),(1,2,8)]);
